@@ -1,3 +1,17 @@
+* Remove insulate in favour of:
+
+import { makeModuleMembrane } from '@agoric/jessie';
+const { imported, exportable } = makeModuleMembrane();
+export const foo = exportable({});
+const bar = imported($i_bar);
+export default exportable(baz);
+
+* General format of the interpreter/compilers in lang.
+
+Convert lib to bundled ASTs.
+Interpret bundled ASTs.
+Futamura Projection
+
 * '\xFF' syntax for Justin?
 
 * Update `writeOutput` and `readInput` to be incremental (i.e. it can be called again to append to output or read next line from stdin).  Use them to implement a true repl.
