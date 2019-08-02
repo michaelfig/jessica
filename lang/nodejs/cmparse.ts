@@ -53,4 +53,4 @@ const cmTag = makeChainmail(pegTag);
 const tag = tagString(cmTag, MODULE);
 
 const str = readInput(MODULE);
-console.log(tag`${str}`);
+console.log(JSON.stringify(tag`${str}`, undefined, 2));
