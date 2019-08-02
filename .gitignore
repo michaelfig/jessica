@@ -2,3 +2,4 @@ checkout/
 node_modules/
 lib/*.js
 .DS_Store
+lang/nodejs/cmparse.js
