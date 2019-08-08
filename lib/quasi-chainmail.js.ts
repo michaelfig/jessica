@@ -30,7 +30,7 @@ const makeChainmail = (peg: IPegTag<IParserTag<any>>) => {
     const {FAIL, HOLE, SKIP} = peg;
     return peg`
 # start production
-start <- _WS typeDecl**(SEMI?) _EOF  ${v => (..._a: any[]) => v};
+start <- _WS typeDecl**(_SEMI*) _EOF  ${v => (..._a: any[]) => v};
 
 typeDecl <- enumDecl / structDecl / interfaceDecl / constDecl;
 
@@ -39,9 +39,9 @@ type <- (primType / "List" _WS / "AnyPointer" _WS / IDENT) typeParameterization?
 
 LPAREN <- "(" _WS;
 RPAREN <- ")" _WS;
-COMMA <- "," _WS     ${_ => SKIP};
+_COMMA <- "," _WS     ${_ => SKIP};
 
-typeParameterization <- LPAREN type**COMMA RPAREN ${(_, parms, _2) => parms};
+typeParameterization <- LPAREN type**_COMMA RPAREN ${(_, parms, _2) => parms};
 
 primType <- "Void" _WS / "Bool" _WS / intType / floatType / "Text" _WS / "Data" _WS;
 
@@ -58,8 +58,8 @@ floatType <- ("Float32" / "Float64" / "Float128") _WS;
 ENUM <- "enum" _WS;
 LBRACE <- "{" _WS;
 RBRACE <- "}" _WS;
-SEMI <- ";" _WS ${_ => SKIP};
-enumDecl <- ENUM type LBRACE (IDENT SEMI)* RBRACE
+_SEMI <- ";" _WS ${_ => SKIP};
+enumDecl <- ENUM type LBRACE (IDENT _SEMI)* RBRACE
   ${(_, etype, _2, ids, _3) => ['enum', etype, ids]};
 
 STRUCT <- "struct" _WS;
@@ -67,7 +67,7 @@ structDecl <- STRUCT type LBRACE memberDecl* RBRACE
   ${(_, stype, _2, members, _3) =>
     ['struct', stype[1], stype[2], members]};
 
-memberDecl <- paramDecl SEMI / typeDecl;
+memberDecl <- paramDecl _SEMI / typeDecl;
 
 INTERFACE <- "interface" _WS;
 interfaceDecl <- INTERFACE type extends? LBRACE methodDecl* RBRACE
@@ -75,20 +75,20 @@ interfaceDecl <- INTERFACE type extends? LBRACE methodDecl* RBRACE
     ['interface', itype, deopt(ext), methods]};
 
 EXTENDS <- "extends" _WS;
-extends <- EXTENDS LPAREN type**COMMA RPAREN
+extends <- EXTENDS LPAREN type**_COMMA RPAREN
   ${(_, _2, types, _3) => types};
 
 RARROW <- "->" _WS;
-paramDecls <- LPAREN paramDecl**COMMA RPAREN
+paramDecls <- LPAREN paramDecl**_COMMA RPAREN
   ${(_, decls, _2) => decls};
-resultDecls <- RARROW LPAREN resultDecl**COMMA RPAREN
+resultDecls <- RARROW LPAREN resultDecl**_COMMA RPAREN
   ${(_, _2, decls, _3) => decls};
-methodDecl <- IDENT methodTypeParams? paramDecls resultDecls? SEMI
+methodDecl <- IDENT methodTypeParams? paramDecls resultDecls? _SEMI
   ${(id, tparams, pdecls, rdecls, _) => ['method', id, deopt(tparams), pdecls, deopt(rdecls)]};
 
 LBRACKET <- "[" _WS;
 RBRACKET <- "]" _WS;
-methodTypeParams <- LBRACKET type**COMMA RBRACKET
+methodTypeParams <- LBRACKET type**_COMMA RBRACKET
   ${(_, types, _2) => types};
 
 COLON <- ":" _WS;
@@ -101,7 +101,7 @@ resultDecl <- IDENT COLON type ${(id, _, type) => ['named', type, id]}
   / type ${(type) => type};
 
 CONST <- "const" _WS;
-constDecl <- CONST IDENT COLON type EQUALS expr SEMI
+constDecl <- CONST IDENT COLON type EQUALS expr _SEMI
   ${(_, id, _2, type, _3, expr, _4) => ['const', id, type, expr]};
 
 string <- STRING ${(s) => ['data', JSON.parse(s)]};
